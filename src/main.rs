@@ -109,6 +109,8 @@ impl Block {
 
 fn main() {
 
+    display::gui();
+
     let mut stdout = std::io::stdout().into_raw_mode().unwrap();
 
     write!(stdout, "{}{}{}", termion::cursor::Goto(1,1), termion::cursor::Hide, termion::clear::All).unwrap();
