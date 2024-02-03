@@ -1,6 +1,7 @@
 
 use crate::files;
 use crate::display;
+use crate::Renderer;
 
 
 #[derive(Clone, Copy)]
@@ -105,7 +106,7 @@ impl Block {
     }
 }
 
-pub fn round(mut alive: Vec<Block>, mut blocks: Vec<Vec<bool>>) -> (Vec<Block>, Vec<Vec<bool>>) {
+pub fn round(mut render: &mut Renderer, mut alive: Vec<Block>, mut blocks: Vec<Vec<bool>>) -> (Vec<Block>, Vec<Vec<bool>>) {
 
 
     let mut temp_blocks = blocks.clone();
@@ -122,7 +123,9 @@ pub fn round(mut alive: Vec<Block>, mut blocks: Vec<Vec<bool>>) -> (Vec<Block>, 
 
             if !temp_blocks[revived[i].position.y as usize][revived[i].position.x as usize] { 
 
-                display::write_block(revived[i].position.x as u16, revived[i].position.y as u16);
+                // display::write_block(revived[i].position.x as u16, revived[i].position.y as u16);
+                
+                render.draw_block(revived[i].position.clone()).unwrap();
 
                 temp_blocks[revived[i].position.y as usize][revived[i].position.x as usize] = true;
 
@@ -135,7 +138,9 @@ pub fn round(mut alive: Vec<Block>, mut blocks: Vec<Vec<bool>>) -> (Vec<Block>, 
         files::log(&("neighbours: ".to_owned() + &alive[count].neighbours.to_string()));
 
         if alive[count].neighbours > 3 || alive[count].neighbours < 2 {
-            display::delete_block(alive[count].position.x as u16, alive[count].position.y as u16);
+            // display::delete_block(alive[count].position.x as u16, alive[count].position.y as u16);
+
+            render.remove_block(alive[count].position.clone()).unwrap();
 
             temp_blocks[alive[count].position.y as usize][alive[count].position.x as usize] = false;
 
@@ -159,8 +164,11 @@ pub fn round(mut alive: Vec<Block>, mut blocks: Vec<Vec<bool>>) -> (Vec<Block>, 
     return (alive, blocks);
 }
 
-pub fn place_block(pos: Point, mut alive: Vec<Block>, mut blocks: Vec<Vec<bool>>) -> (Vec<Block>, Vec<Vec<bool>>) {
-    display::write_block(pos.x as u16, pos.y as u16);
+pub fn place_block(mut render: &mut Renderer,pos: Point, mut alive: Vec<Block>, mut blocks: Vec<Vec<bool>>) -> (Vec<Block>, Vec<Vec<bool>>) {
+    // display::write_block(pos.x as u16, pos.y as u16);
+    
+    render.draw_block(pos.clone());
+
     alive.push(Block::new(Point{x:pos.x,y:pos.y}));
     blocks[pos.y as usize][pos.x as usize] = true;
 

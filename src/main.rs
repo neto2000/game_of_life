@@ -37,9 +37,25 @@ impl Renderer {
         Ok( Renderer { canvas })
     }
 
-    pub fn draw_block(&mut self, pos: &game::Point) -> Result<(), String> {
+    pub fn draw_block(&mut self, pos: game::Point) -> Result<(), String> {
         
         self.canvas.set_draw_color(Color::RGB(255, 255, 255));
+
+        self.canvas.fill_rect(Rect::new(
+            pos.x * BLOCK_SIZE as i32, 
+            pos.y * BLOCK_SIZE as i32,  
+            BLOCK_SIZE, 
+            BLOCK_SIZE,
+        ))?; 
+
+        self.canvas.present();
+        
+        Ok(())
+    }
+
+    pub fn remove_block(&mut self, pos: game::Point) -> Result<(), String> {
+        
+        self.canvas.set_draw_color(Color::RGB(0, 0, 0));
 
         self.canvas.fill_rect(Rect::new(
             pos.x * BLOCK_SIZE as i32, 
@@ -89,7 +105,7 @@ fn main() -> Result<(), String> {
 
     render.setup()?;
 
-    render.draw_block(&game::Point { x: 10, y: 10 })?; 
+    render.draw_block(game::Point { x: 10, y: 10 })?; 
 
 
 
@@ -99,10 +115,10 @@ fn main() -> Result<(), String> {
 
     let mut blocks: Vec<Vec<bool>> = Vec::new();
 
-    for i in 0..20 {
+    for i in 0..60 {
         blocks.push(Vec::new());
 
-        for _j in 0..20 {
+        for _j in 0..80 {
             blocks[i as usize].push(false);
         }
     }
@@ -110,10 +126,11 @@ fn main() -> Result<(), String> {
     let mut alive: Vec<game::Block> = Vec::new();
 
 
+    let (mut alive, mut blocks) = start_setup(&mut render, alive, blocks);
     
     
-    let mut rounds = 0;
-    
+
+    let mut frame_counter = 0;
 
     'running: loop {
         for event in event_pump.poll_iter() {
@@ -129,42 +146,54 @@ fn main() -> Result<(), String> {
 
         // canvas.clear();
         // canvas.present();
+        //
+
 
         ::std::thread::sleep(Duration::new(0, 1_000_000_000u32 / 30));
         // The rest of the game loop goes here...
+        //
+        
+        frame_counter += 1;
+
+        if frame_counter % 10 == 0 {
+        
+            (alive, blocks) = game::round(&mut render, alive.clone(), blocks.clone());
+            
+            frame_counter = 0;
+        }
     }
 
     Ok(())
 }
 
-fn start_setup(mut alive: Vec<game::Block>, mut blocks: Vec<Vec<bool>>) {
+fn start_setup(mut render: &mut Renderer, mut alive: Vec<game::Block>, mut blocks: Vec<Vec<bool>>) -> (Vec<game::Block>,Vec<Vec<bool>>)  {
 
-    let (mut alive, mut blocks) = game::place_block(game::Point{x:25,y:25}, alive, blocks);
-    let (mut alive, mut blocks) = game::place_block(game::Point{x:25,y:26}, alive, blocks);
-    let (mut alive, mut blocks) = game::place_block(game::Point{x:25,y:27}, alive, blocks);
-    let (mut alive, mut blocks) = game::place_block(game::Point{x:27,y:24}, alive, blocks);
-    let (mut alive, mut blocks) = game::place_block(game::Point{x:27,y:28}, alive, blocks);
+    let (mut alive, mut blocks) = game::place_block(render, game::Point{x:25,y:25}, alive, blocks);
+    let (mut alive, mut blocks) = game::place_block(render, game::Point{x:25,y:26}, alive, blocks);
+    let (mut alive, mut blocks) = game::place_block(render, game::Point{x:25,y:27}, alive, blocks);
+    let (mut alive, mut blocks) = game::place_block(render, game::Point{x:27,y:24}, alive, blocks);
+    let (mut alive, mut blocks) = game::place_block(render, game::Point{x:27,y:28}, alive, blocks);
     
-    let (mut alive, mut blocks) = game::place_block(game::Point{x:28,y:24}, alive, blocks);
-    let (mut alive, mut blocks) = game::place_block(game::Point{x:28,y:28}, alive, blocks);
-    let (mut alive, mut blocks) = game::place_block(game::Point{x:30,y:25}, alive, blocks);
-    let (mut alive, mut blocks) = game::place_block(game::Point{x:30,y:26}, alive, blocks);
-    let (mut alive, mut blocks) = game::place_block(game::Point{x:30,y:27}, alive, blocks);
+    let (mut alive, mut blocks) = game::place_block(render, game::Point{x:28,y:24}, alive, blocks);
+    let (mut alive, mut blocks) = game::place_block(render, game::Point{x:28,y:28}, alive, blocks);
+    let (mut alive, mut blocks) = game::place_block(render, game::Point{x:30,y:25}, alive, blocks);
+    let (mut alive, mut blocks) = game::place_block(render, game::Point{x:30,y:26}, alive, blocks);
+    let (mut alive, mut blocks) = game::place_block(render, game::Point{x:30,y:27}, alive, blocks);
 
-    let (mut alive, mut blocks) = game::place_block(game::Point{x:33,y:25}, alive, blocks);
-    let (mut alive, mut blocks) = game::place_block(game::Point{x:33,y:26}, alive, blocks);
-    let (mut alive, mut blocks) = game::place_block(game::Point{x:33,y:27}, alive, blocks);
-    let (mut alive, mut blocks) = game::place_block(game::Point{x:35,y:24}, alive, blocks);
-    let (mut alive, mut blocks) = game::place_block(game::Point{x:35,y:28}, alive, blocks);
+    let (mut alive, mut blocks) = game::place_block(render, game::Point{x:33,y:25}, alive, blocks);
+    let (mut alive, mut blocks) = game::place_block(render, game::Point{x:33,y:26}, alive, blocks);
+    let (mut alive, mut blocks) = game::place_block(render, game::Point{x:33,y:27}, alive, blocks);
+    let (mut alive, mut blocks) = game::place_block(render, game::Point{x:35,y:24}, alive, blocks);
+    let (mut alive, mut blocks) = game::place_block(render, game::Point{x:35,y:28}, alive, blocks);
     
-    let (mut alive, mut blocks) = game::place_block(game::Point{x:36,y:24}, alive, blocks);
-    let (mut alive, mut blocks) = game::place_block(game::Point{x:36,y:28}, alive, blocks);
-    let (mut alive, mut blocks) = game::place_block(game::Point{x:38,y:25}, alive, blocks);
-    let (mut alive, mut blocks) = game::place_block(game::Point{x:38,y:26}, alive, blocks);
-    let (mut alive, mut blocks) = game::place_block(game::Point{x:38,y:27}, alive, blocks);
+    let (mut alive, mut blocks) = game::place_block(render, game::Point{x:36,y:24}, alive, blocks);
+    let (mut alive, mut blocks) = game::place_block(render, game::Point{x:36,y:28}, alive, blocks);
+    let (mut alive, mut blocks) = game::place_block(render, game::Point{x:38,y:25}, alive, blocks);
+    let (mut alive, mut blocks) = game::place_block(render, game::Point{x:38,y:26}, alive, blocks);
+    let (mut alive, mut blocks) = game::place_block(render, game::Point{x:38,y:27}, alive, blocks);
  
 
-
+    return (alive, blocks);
 }
 
 
