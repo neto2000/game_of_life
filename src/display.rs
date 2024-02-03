@@ -1,52 +1,55 @@
 use termion::{self};
-use iced::{Element, Sandbox, Settings};
-use iced::widget::{button,column,text,Column};
 
+extern crate sdl2;
 
+use sdl2::event::Event;
+use sdl2::keyboard::Keycode;
+use sdl2::pixels::Color;
+use std::time::Duration;
 
-pub fn gui() -> iced::Result {
-    Counter::run(Settings::default())
-}
+pub fn gui() -> Result<(), String> {
 
-struct Counter{
-    value: i32,   
-}
-#[derive(Debug,Clone, Copy)]
-pub enum Message {
-    Increment,
-}
+    let sdl_context = sdl2::init()?;
 
-impl Sandbox for Counter {
+    let video_subsystem = sdl_context.video()?;
 
+    let window = video_subsystem
+        .window("rust-sdl2 demo: Video", 800, 600)
+        .position_centered()
+        .opengl()
+        .build()
+        .map_err(|e| e.to_string())?;
 
-    type Message = Message;
+    let mut canvas = window.into_canvas().build().map_err(|e| e.to_string())?;
 
-    fn new() -> Self {
-        Self{ value: 0 }
-    }
+    canvas.set_draw_color(Color::RGB(255, 0, 0));
+    canvas.clear();
+    canvas.present();
+    let mut event_pump = sdl_context.event_pump()?;
 
-    fn title(&self) -> String {
-        String::from("A cool application")
-    }
-
-    fn update(&mut self, message: Message) {
-        // This application has no interactions
-        //
-        match message {
-            Message::Increment => {
-                self.value += 1;
+    'running: loop {
+        for event in event_pump.poll_iter() {
+            match event {
+                Event::Quit { .. }
+                | Event::KeyDown {
+                    keycode: Some(Keycode::Escape),
+                    ..
+                } => break 'running,
+                _ => {}
             }
         }
+
+        canvas.clear();
+        canvas.present();
+        ::std::thread::sleep(Duration::new(0, 1_000_000_000u32 / 30));
+        // The rest of the game loop goes here...
     }
 
-    fn view(&self) -> Element<Message> {
-        column![
-            button("+").on_press(Message::Increment),
-
-            text(self.value).size(50),
-        ].into()
-    }
+    Ok(())
 }
+
+
+
 
 
 
