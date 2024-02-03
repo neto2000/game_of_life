@@ -98,7 +98,9 @@ fn main() -> Result<(), String> {
         .map_err(|e| e.to_string())?;
 
 
-        let mut event_pump = sdl_context.event_pump()?;
+    let mut event_pump = sdl_context.event_pump()?;
+
+    let mut state;
 
     
     let mut render = Renderer::new(window)?;
@@ -144,10 +146,15 @@ fn main() -> Result<(), String> {
             }
         }
 
-        // canvas.clear();
-        // canvas.present();
-        //
+        if event_pump.mouse_state().is_mouse_button_pressed(sdl2::mouse::MouseButton::Left) {
 
+            state = event_pump.mouse_state();
+
+            println!("x = {}, y = {}", state.x(), state.y());
+
+            render.draw_block(game::Point { x: (state.x() as f32 / BLOCK_SIZE as f32) as i32, y: (state.y() as f32 / BLOCK_SIZE as f32) as i32 })?;
+
+        } 
 
         ::std::thread::sleep(Duration::new(0, 1_000_000_000u32 / 30));
         // The rest of the game loop goes here...
