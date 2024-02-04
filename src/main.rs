@@ -152,8 +152,12 @@ fn main() -> Result<(), String> {
 
             println!("x = {}, y = {}", state.x(), state.y());
 
-            render.draw_block(game::Point { x: (state.x() as f32 / BLOCK_SIZE as f32) as i32, y: (state.y() as f32 / BLOCK_SIZE as f32) as i32 })?;
+            let pos: game::Point = game::Point { x: (state.x() as f32 / BLOCK_SIZE as f32) as i32, y: (state.y() as f32 / BLOCK_SIZE as f32) as i32 };
 
+            //render.draw_block(pos)?;
+            
+            
+            (alive, blocks) = game::place_block(&mut render, pos, alive, blocks);
         } 
 
         ::std::thread::sleep(Duration::new(0, 1_000_000_000u32 / 30));
