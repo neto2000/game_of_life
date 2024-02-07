@@ -22,6 +22,7 @@ const GRID_Y: u32 = 60;
 
 const BLOCK_SIZE: u32 = 10;
 
+
 pub struct Renderer {
 
     pub canvas: WindowCanvas,
@@ -102,12 +103,13 @@ fn main() -> Result<(), String> {
 
     let mut state;
 
+    let play_button_begin: game::Point = game::Point { x: 78, y: 58 };
+
     
     let mut render = Renderer::new(window)?;
 
     render.setup()?;
 
-    render.draw_block(game::Point { x: 10, y: 10 })?; 
 
 
 
@@ -131,8 +133,11 @@ fn main() -> Result<(), String> {
     let (mut alive, mut blocks) = start_setup(&mut render, alive, blocks);
     
     
+    let mut mouse_is_pressed: bool = false;
 
     let mut frame_counter = 0;
+
+    let mut stop: bool = false;
 
     'running: loop {
         for event in event_pump.poll_iter() {
@@ -146,19 +151,34 @@ fn main() -> Result<(), String> {
             }
         }
 
-        if event_pump.mouse_state().is_mouse_button_pressed(sdl2::mouse::MouseButton::Left) {
+        if event_pump.mouse_state().is_mouse_button_pressed(sdl2::mouse::MouseButton::Left)  {
+
 
             state = event_pump.mouse_state();
 
-            println!("x = {}, y = {}", state.x(), state.y());
-
             let pos: game::Point = game::Point { x: (state.x() as f32 / BLOCK_SIZE as f32) as i32, y: (state.y() as f32 / BLOCK_SIZE as f32) as i32 };
 
-            //render.draw_block(pos)?;
+            if pos.is_between(&play_button_begin, &game::Point { x: GRID_X as i32 * BLOCK_SIZE as i32, y: GRID_Y as i32 * BLOCK_SIZE as i32 }) && !mouse_is_pressed {
+
+                stop = !stop;
+
+                println!("stop")
+
+            } 
+            else if stop && !mouse_is_pressed{
+
+                
+                
+                (alive, blocks) = game::place_block(&mut render, pos, alive, blocks);
+            }
+
             
-            
-            (alive, blocks) = game::place_block(&mut render, pos, alive, blocks);
-        } 
+            mouse_is_pressed = true;
+        }
+        else {
+
+            mouse_is_pressed = false;
+        }
 
         ::std::thread::sleep(Duration::new(0, 1_000_000_000u32 / 30));
         // The rest of the game loop goes here...
@@ -166,7 +186,7 @@ fn main() -> Result<(), String> {
         
         frame_counter += 1;
 
-        if frame_counter % 10 == 0 {
+        if frame_counter % 10 == 0 && !stop {
         
             (alive, blocks) = game::round(&mut render, alive.clone(), blocks.clone());
             
@@ -176,6 +196,8 @@ fn main() -> Result<(), String> {
 
     Ok(())
 }
+
+
 
 fn start_setup(mut render: &mut Renderer, mut alive: Vec<game::Block>, mut blocks: Vec<Vec<bool>>) -> (Vec<game::Block>,Vec<Vec<bool>>)  {
 

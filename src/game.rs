@@ -10,6 +10,21 @@ pub struct Point {
     pub y: i32,
 }
 
+impl Point {
+
+    pub fn is_between(&self, p1: &Point, p2: &Point) -> bool {
+
+        if self.x >= p1.x && self.y >= p1.y && self.x <= p2.x && self.y <= p2.y {
+
+            return true;
+            
+        }
+
+        return false
+    }
+
+}
+
 #[derive(Clone, Copy)]
 pub struct Block {
     pub position: Point,
