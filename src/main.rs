@@ -10,6 +10,8 @@ use sdl2::video::Window;
 
 use std::time::Duration;
 
+use crate::game::Block;
+
 
 pub mod display;
 pub mod files;
@@ -139,6 +141,8 @@ fn main() -> Result<(), String> {
 
     let mut stop: bool = false;
 
+    let mut add: Vec<game::Point> = Vec::new(); 
+
     'running: loop {
         for event in event_pump.poll_iter() {
             match event {
@@ -160,6 +164,23 @@ fn main() -> Result<(), String> {
 
             if pos.is_between(&play_button_begin, &game::Point { x: GRID_X as i32 * BLOCK_SIZE as i32, y: GRID_Y as i32 * BLOCK_SIZE as i32 }) && !mouse_is_pressed {
 
+                if stop {
+
+                    for block in add {
+
+                        if blocks[block.y as usize][block.x as usize] {
+
+
+                            (alive, blocks) = game::place_block(&mut render, block, alive, blocks);
+
+                        }
+
+                    }
+
+                    add = Vec::new();
+
+                }
+
                 stop = !stop;
 
                 println!("stop")
@@ -169,7 +190,23 @@ fn main() -> Result<(), String> {
 
                 
                 
-                (alive, blocks) = game::place_block(&mut render, pos, alive, blocks);
+                // (alive, blocks) = game::place_block(&mut render, pos, alive, blocks);
+                //
+                //
+                if blocks[pos.y as usize][pos.x as usize] {
+
+                    render.remove_block(pos)?;
+
+                    blocks[pos.y as usize][pos.x as usize] = false;
+                }
+                else {
+
+                    render.draw_block(pos)?;
+
+                    blocks[pos.y as usize][pos.x as usize] = true;
+
+                    add.push(pos);
+                }
             }
 
             
