@@ -1,4 +1,6 @@
 
+use crate::GRID_X;
+use crate::GRID_Y;
 use crate::files;
 use crate::display;
 use crate::Renderer;
@@ -35,6 +37,53 @@ impl Block {
     fn new(pos: Point) -> Self {
         Self {position: pos, neighbours: 0}
     }
+    
+    // when the addition overflows the Grid its starts at the other end of the screen
+    fn add_with_boundries(&self, add_pos: &Point) -> Point {
+
+        let mut p: Point = Point { x: 0, y: 0 };
+
+        if self.position.x + add_pos.x >= GRID_X as i32   {
+            
+            p.x = self.position.x + add_pos.x - (GRID_X as i32);
+
+        }
+        else if self.position.x + add_pos.x < 0 {
+
+
+            p.x = self.position.x + add_pos.x + (GRID_X as i32);
+
+        }
+        else {
+
+            
+
+            p.x = self.position.x + add_pos.x;
+
+        }
+
+
+        if self.position.y + add_pos.y >= GRID_Y as i32 {
+
+
+            p.y = self.position.y + add_pos.y - (GRID_Y as i32);
+
+        }
+        else if self.position.y + add_pos.y < 0 {
+
+
+            p.y = self.position.y + add_pos.y + (GRID_Y as i32);
+        }
+        else {
+
+
+            p.y = self.position.y + add_pos.y;
+
+        }
+
+        return p
+
+    }
 
     fn get_neighbours(&mut self, blocks: &Vec<Vec<bool>>) -> Vec<Block> {
         let mut neigh_pos: Point = Point{x: -1, y: -1};
@@ -53,12 +102,13 @@ impl Block {
             }
 
 
+            let current_neighbor = self.add_with_boundries(&neigh_pos);
 
-            if blocks[(self.position.y + neigh_pos.y) as usize][(self.position.x + neigh_pos.x) as usize] {
+            if blocks[(current_neighbor.y) as usize][(current_neighbor.x) as usize] {
                 self.neighbours += 1
             }
             else {
-                let mut dead: Block = Block::new(Point{x:self.position.x + neigh_pos.x, y:self.position.y + neigh_pos.y});
+                let mut dead: Block = Block::new(Point{x: current_neighbor.x, y: current_neighbor.y});
 
                 dead.check_revive(&blocks);
 
@@ -97,8 +147,9 @@ impl Block {
             }
 
 
+            let current_neighbor = self.add_with_boundries(&neigh_pos);
 
-            if blocks[(self.position.y + neigh_pos.y) as usize][(self.position.x + neigh_pos.x) as usize] {
+            if blocks[(current_neighbor.y) as usize][(current_neighbor.x) as usize] {
                 self.neighbours += 1
             }
             

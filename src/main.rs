@@ -156,6 +156,8 @@ fn main() -> Result<(), String> {
         }
     }
 
+    println!("y: {}, x: {}", blocks.len(), blocks[0].len());
+
     let mut alive: Vec<game::Block> = Vec::new();
 
 
