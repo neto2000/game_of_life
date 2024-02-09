@@ -7,8 +7,10 @@ use sdl2::pixels::Color;
 use sdl2::rect::Rect;
 use sdl2::render::WindowCanvas;
 use sdl2::video::Window;
+use sdl2::image::{InitFlag, LoadTexture};
 
 use std::time::Duration;
+use std::path::Path;
 
 use crate::game::Block;
 
@@ -72,12 +74,37 @@ impl Renderer {
         Ok(())
     }
 
+    pub fn draw_play(&mut self, path: &str) -> Result<(), String> {
+
+        
+        let texture_creator = self.canvas.texture_creator();
+        let texture = texture_creator.load_texture(path)?;
+
+        let sprite_rect = Rect::new(0, 0, 9, 9);
+
+        let screen_rect = Rect::new(
+            GRID_X as i32 * BLOCK_SIZE as i32 - 30,
+            GRID_Y as i32 * BLOCK_SIZE as i32 - 30,
+            27,
+            27
+        );
+
+        
+        self.canvas.copy(&texture, sprite_rect, screen_rect)?;
+        self.canvas.present();
+
+        Ok(())
+
+    }
+
 
     pub fn setup(&mut self) -> Result<(), String> {
 
         self.canvas.set_draw_color(Color::RGB(0, 0, 0));
         self.canvas.clear();
         self.canvas.present();
+
+        self.draw_play("./static/pause.png")?;
 
         Ok(())
     }
@@ -105,7 +132,7 @@ fn main() -> Result<(), String> {
 
     let mut state;
 
-    let play_button_begin: game::Point = game::Point { x: 78, y: 58 };
+    let play_button_begin: game::Point = game::Point { x: 77, y: 57 };
 
     
     let mut render = Renderer::new(window)?;
@@ -179,6 +206,14 @@ fn main() -> Result<(), String> {
 
                     add = Vec::new();
 
+
+                    render.draw_play("./static/pause.png")?;
+
+                }
+                else {
+
+
+                    render.draw_play("./static/play.png")?;
                 }
 
                 stop = !stop;
